@@ -1,10 +1,10 @@
 CXX=mpicxx
-CXXFLAGS=-O3 -fopenmp  -fpermissive
+CXXFLAGS=-O3 -fopenmp  -fpermissive -DDEBUG
 
 ifeq ($(PE_ENV),GNU)
     # the gnu compiler requires that we specifically enable OpenMP
 	#CXXFLAGS=-O0 -g -fopenmp -DDEBUG
-	CXXFLAGS=-O3 -fopenmp
+	CXXFLAGS=-O3 -fopenmp 
 endif
 ifeq ($(PE_ENV),CRAY)
 	CXXFLAGS=-O3

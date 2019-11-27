@@ -145,7 +145,6 @@ int main(int argc, char* argv[])
 
     int thread_level;
 
-
     // initialize subdomain
     domain.init(mpi_rank, mpi_size, options);
     domain.print();

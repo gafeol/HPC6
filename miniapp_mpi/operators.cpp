@@ -16,6 +16,15 @@
 #include "operators.h"
 #include "stats.h"
 
+#define N 0
+#define B 1
+#define W 2
+#define E 3
+
+int tag_from(int x){
+    return (x^1);
+}
+
 namespace operators {
 
 void diffusion(const data::Field &U, data::Field &S)
@@ -44,8 +53,55 @@ void diffusion(const data::Field &U, data::Field &S)
     int iend  = nx - 1;
     int jend  = ny - 1;
 
-    if(domain.neighbour_north>=0) {
-        // ...
+    MPI_Request sndN_req, rcvN_req, sndS_req, rcvS_req, sndE_req, rcvE_req, sndW_req, rcvW_req;
+    if (domain.neighbour_north >= 0)
+    {
+        for(int i=0;i<=iend;i++)
+            buffN[i] = U(i, jend);
+        MPI_Irecv(&bndN[0], nx, MPI_DOUBLE, domain.neighbour_north, tag_from(N), comm_cart, &rcvN_req);
+        MPI_Isend(&buffN[0], nx, MPI_DOUBLE, domain.neighbour_north, N, comm_cart, &sndN_req);
+    }
+
+    if (domain.neighbour_south >= 0)
+    {
+        for(int i=0;i<=iend;i++)
+            buffS[i] = U(i, 0);
+        MPI_Irecv(&bndS[0], nx, MPI_DOUBLE, domain.neighbour_south, tag_from(B), comm_cart, &rcvS_req);
+        MPI_Isend(&buffS[0], nx, MPI_DOUBLE, domain.neighbour_south, B, comm_cart, &sndS_req);
+    }
+
+    if (domain.neighbour_east >= 0)
+    {
+        for (int j = 0; j <=jend; j++)
+            buffE[j] = U(0, j);
+        MPI_Irecv(&bndE[0], ny, MPI_DOUBLE, domain.neighbour_east, tag_from(E), comm_cart, &rcvE_req);
+        MPI_Isend(&buffE[0], ny, MPI_DOUBLE, domain.neighbour_east, E, comm_cart, &sndE_req);
+    }
+
+    if (domain.neighbour_west >= 0)
+    {
+        for (int j = 0; j <= jend; j++)
+            buffW[j] = U(iend, j);
+        MPI_Irecv(&bndW[0], ny, MPI_DOUBLE, domain.neighbour_west, tag_from(W), comm_cart, &rcvW_req);
+        MPI_Isend(&buffW[0], ny, MPI_DOUBLE, domain.neighbour_west, W, comm_cart, &sndW_req);
+    }
+    MPI_Status status;
+    if (domain.neighbour_north >= 0){
+        MPI_Wait(&sndN_req, &status);
+        MPI_Wait(&rcvN_req, &status);
+    }
+    if (domain.neighbour_south >= 0){
+        MPI_Wait(&sndS_req, &status);
+        MPI_Wait(&rcvS_req, &status);
+    }
+    if (domain.neighbour_east >= 0){
+        MPI_Wait(&sndE_req, &status); 
+        MPI_Wait(&rcvE_req, &status);
+
+    }
+    if (domain.neighbour_west >= 0){
+        MPI_Wait(&sndW_req, &status);
+        MPI_Wait(&rcvW_req, &status);
     }
 
     // the interior grid points

@@ -57,13 +57,15 @@ void cg_init(int nx, int ny)
 // x and y are vectors on length N
 double ss_dot(Field const& x, Field const& y)
 {
-    double result = 0;
+    double partial_result = 0;
     int N = y.length();
 
-    #pragma omp parallel for reduction(+:result)
+    #pragma omp parallel for reduction(+:partial_result)
     for (int i = 0; i < N; i++)
-        result += x[i] * y[i];
+        partial_result += x[i] * y[i];
 
+    double result = 0;
+    MPI_Allreduce(&partial_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm_cart);
     return result;
 }
 
@@ -71,13 +73,15 @@ double ss_dot(Field const& x, Field const& y)
 // x is a vector on length N
 double ss_norm2(Field const& x)
 {
-    double result = 0;
+    double partial_result = 0;
     int N = x.length();
 
-    #pragma omp parallel for reduction(+:result)
+    #pragma omp parallel for reduction(+:partial_result)
     for (int i = 0; i < N; i++)
-        result += x[i] * x[i];
+        partial_result += x[i] * x[i];
 
+    double result = 0;
+    MPI_Allreduce(&partial_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm_cart);
     return sqrt(result);
 }
 
