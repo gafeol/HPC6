@@ -72,16 +72,16 @@ void diffusion(const data::Field &U, data::Field &S)
 
     if (domain.neighbour_east >= 0)
     {
-        for (int j = 0; j <=jend; j++)
-            buffE[j] = U(0, j);
+        for (int j=0;j<=jend; j++)
+            buffE[j] = U(iend, j);
         MPI_Irecv(&bndE[0], ny, MPI_DOUBLE, domain.neighbour_east, tag_from(E), comm_cart, &rcvE_req);
         MPI_Isend(&buffE[0], ny, MPI_DOUBLE, domain.neighbour_east, E, comm_cart, &sndE_req);
     }
 
     if (domain.neighbour_west >= 0)
     {
-        for (int j = 0; j <= jend; j++)
-            buffW[j] = U(iend, j);
+        for (int j = 0; j<=jend; j++)
+            buffW[j] = U(0, j);
         MPI_Irecv(&bndW[0], ny, MPI_DOUBLE, domain.neighbour_west, tag_from(W), comm_cart, &rcvW_req);
         MPI_Isend(&buffW[0], ny, MPI_DOUBLE, domain.neighbour_west, W, comm_cart, &sndW_req);
     }
